@@ -1,5 +1,16 @@
 board = [" " for _ in range(9)]
 
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.score = 0
+
+    def add_point(self):
+        self.score += 1
+
+    def display_score(self):
+        print(f"{self.name}: {self.score} point(s)")
+
 def welcome():
     print("Time for Tic Tac Toe!\n")
     print("Enter your move using the following integer positions:")
