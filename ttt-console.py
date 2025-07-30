@@ -15,12 +15,10 @@ class Player:
 
     def display_score(self):
         print(f"{self.name}: {self.x_score + self.o_score} point(s)")
-        print(f" {self.x_score} playing as X")
-        print(f" {self.o_score} playing as O")
+        print(f" {self.x_score} point(s) playing as X")
+        print(f" {self.o_score} point(s) playing as O")
 
-def welcome():
-    print("Time for Tic Tac Toe!\n")
-
+def start_1v1():
     print("Player X, Enter your username:")
     name = input()
     if name in saved_players:
@@ -38,9 +36,7 @@ def welcome():
     else:
         playerO = Player(name)
         saved_players[name] = playerO
-    
-    print("Enter your move using the following integer positions:")
-    print("0 | 1 | 2\n---------\n3 | 4 | 5\n---------\n6 | 7 | 8\n")
+
     return playerX, playerO
 
 def print_board():
@@ -118,16 +114,40 @@ def game_loop(playerX, playerO):
         num_moves += 1
         if num_moves > 4:
             game_over = check_win(num_moves, playerX, playerO)
-        if (game_over == True):
-            print("Enter any character to play again or 'q' to quit")
-            if (input() == 'q'):
+            if game_over == True:
+                board[:] = [' '] * 9
+                input("Enter any character to continue: ")
+
+
+def main():
+    while True:
+        print("\nTime for Tic Tac Toe!\n")
+        print("Select an option below 1-3:")
+        print("1: Play against a friend")
+        print("2: Play against a CPU (to-do)")
+        print("3: See scoreboard")
+        print("q: Quit")
+        choice = input("Your choice: ")
+        print("")
+
+        match choice:
+            case "1":
+                playerX, playerO = start_1v1()
+                print("\nEnter your move using the following integer positions:")
+                print("0 | 1 | 2\n---------\n3 | 4 | 5\n---------\n6 | 7 | 8\n")
+                game_loop(playerX, playerO)
+            case "2":
+                print("This function has not been implemented yet")
+                input("Enter any character to continue: ")
+            case "3":
+                for player in saved_players.values():
+                    Player.display_score(player)
+                input("Enter any character to continue: ")
+            case "q":
                 print("Thanks for playing Tic Tac Toe!")
                 break
-            board[:] = [' '] * 9
-            x_turn = True
-            num_moves = 0
-            game_over = False
-            playerX, playerO = welcome()
+            case _:
+                print("Invalid option, try again.")
+                input("Enter any character to continue: ")
 
-
-game_loop(*welcome())
+main()
