@@ -1,3 +1,5 @@
+import random
+
 # initialization of tic-tac-toe board and dictionary of players
 board = [" " for _ in range(9)]
 saved_players = {}
@@ -92,7 +94,7 @@ def check_win(num_moves, playerX, playerO):
     return False
 
 # prompts player setup for user vs user
-def start_1v1():
+def prompt_1v1():
     print("Player X, Enter your username:")
     name = input()
     if name in saved_players:
@@ -119,7 +121,6 @@ def game_1v1(playerX, playerO):
     x_turn = True
     num_moves = 0
     while game_over == False:
-        print_board()
         x_turn = player_move(x_turn, playerX, playerO)
         num_moves += 1
         if num_moves > 4:
@@ -127,6 +128,99 @@ def game_1v1(playerX, playerO):
             if game_over == True:
                 board[:] = [' '] * 9
                 input("Enter any character to continue: ")
+                break
+        print_board()
+
+# calculates CPU move
+def cpu_move(userX):
+    while True:
+        random_int = random.randint(0, 8)
+        if userX == False:
+            if (0 <= random_int < 9 and board[random_int] == ' '):
+                board[random_int] = 'X'
+                print(f"CPU places an 'X' at position {random_int}")
+                return False
+            else:
+                return cpu_move(userX)
+        else:
+            if (0 <= random_int < 9 and board[random_int] == ' '):
+                board[random_int] = 'O'
+                print(f"CPU places an 'O' at position {random_int}")
+                return True
+            else:
+                return cpu_move(userX)
+
+# runs a user vs cpu game
+def game_cpu():
+    # setup CPU
+    if "CPU" not in saved_players:
+        saved_players["CPU"] = Player("CPU")
+    
+    print("Enter your username:")
+    name = input()
+    while True:
+        # prompt player setup if user has already played
+        if name in saved_players:
+            print(f"Welcome, {name}")
+            choice = input("Enter 'X' or 'O' to play as X or O: ")
+            match choice:
+                case "X":
+                    playerX = saved_players[name]
+                    playerO = saved_players["CPU"]
+                    userX = True
+                    break
+                case "O":
+                    playerO = saved_players[name]
+                    playerX = saved_players["CPU"]
+                    userX = False
+                    break
+                case _:
+                    print("Invalid option, try again.")
+        # prompt player setup for new user
+        else:
+            choice = input("Enter 'X' or 'O' to play as X or O: ")
+            match choice:
+                case "X":
+                    playerX = Player(name)
+                    saved_players[name] = playerX
+                    playerO = saved_players["CPU"]
+                    userX = True
+                    break
+                case "O":
+                    playerO = Player(name)
+                    saved_players[name] = playerO
+                    playerX = saved_players["CPU"]
+                    userX = False
+                    break
+                case _:
+                    print("Invalid option, try again.")
+    # game logic
+    game_over = False
+    x_turn = True
+    num_moves = 0
+    print("\nEnter your move using the following integer positions:")
+    print("0 | 1 | 2\n---------\n3 | 4 | 5\n---------\n6 | 7 | 8\n")
+    while game_over == False:
+        if userX == True:
+            if x_turn == True:
+                x_turn = player_move(x_turn, playerX, playerO)
+            else:
+                cpu_move(userX)
+                x_turn = True
+        else:
+            if x_turn == True:
+                cpu_move(userX)
+                x_turn = False
+            else:
+                x_turn = player_move(x_turn, playerX, playerO)
+        num_moves += 1
+        if num_moves > 4:
+            game_over = check_win(num_moves, playerX, playerO)
+            if game_over == True:
+                board[:] = [' '] * 9
+                input("Enter any character to continue: ")
+                break
+        print_board()
 
 # main function for tic-tac-toe
 def main():
@@ -134,7 +228,7 @@ def main():
         print("\nTime for Tic Tac Toe!\n")
         print("Select an option below 1-3:")
         print("1: Play against a friend")
-        print("2: Play against a CPU (to-do)")
+        print("2: Play against a CPU")
         print("3: See scoreboard")
         print("q: Quit")
         choice = input("Your choice: ")
@@ -142,21 +236,21 @@ def main():
 
         match choice:
             case "1":
-                playerX, playerO = start_1v1()
+                playerX, playerO = prompt_1v1()
                 print("\nEnter your move using the following integer positions:")
                 print("0 | 1 | 2\n---------\n3 | 4 | 5\n---------\n6 | 7 | 8\n")
                 game_1v1(playerX, playerO)
             case "2":
-                print("This function has not been implemented yet")
-                input("Enter any character to continue: ")
+                game_cpu()
             case "3":
+                # sorts saved players dictionary into a list
                 if len(saved_players) > 1:
                     sorted_players = list(saved_players.values())
                     for i in range(len(sorted_players) - 1):
                         for j in range(len(sorted_players) - i - 1):
                             if Player.get_tscore(sorted_players[j]) < Player.get_tscore(sorted_players[j + 1]):
                                 sorted_players[j], sorted_players[j + 1] = sorted_players[j + 1], sorted_players[j]
-
+                    # prints sorted list
                     for player in sorted_players:
                         Player.display_score(player)
 
