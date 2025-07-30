@@ -13,6 +13,9 @@ class Player:
     def add_opoint(self):
         self.o_score += 1
 
+    def get_tscore(self):
+        return self.x_score + self.o_score
+
     def display_score(self):
         print(f"{self.name}: {self.x_score + self.o_score} point(s)")
         print(f" {self.x_score} point(s) playing as X")
@@ -104,7 +107,7 @@ def check_win(num_moves, playerX, playerO):
     
     return False
 
-def game_loop(playerX, playerO):
+def game_1v1(playerX, playerO):
     game_over = False
     x_turn = True
     num_moves = 0
@@ -135,13 +138,22 @@ def main():
                 playerX, playerO = start_1v1()
                 print("\nEnter your move using the following integer positions:")
                 print("0 | 1 | 2\n---------\n3 | 4 | 5\n---------\n6 | 7 | 8\n")
-                game_loop(playerX, playerO)
+                game_1v1(playerX, playerO)
             case "2":
                 print("This function has not been implemented yet")
                 input("Enter any character to continue: ")
             case "3":
-                for player in saved_players.values():
-                    Player.display_score(player)
+                if len(saved_players) > 1:
+                    sorted_players = list(saved_players.values())
+                    for i in range(len(sorted_players) - 1):
+                        for j in range(len(sorted_players) - i - 1):
+                            if Player.get_tscore(sorted_players[j]) < Player.get_tscore(sorted_players[j + 1]):
+                                sorted_players[j], sorted_players[j + 1] = sorted_players[j + 1], sorted_players[j]
+
+                    for player in sorted_players:
+                        Player.display_score(player)
+
+
                 input("Enter any character to continue: ")
             case "q":
                 print("Thanks for playing Tic Tac Toe!")
