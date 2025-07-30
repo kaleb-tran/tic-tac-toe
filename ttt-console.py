@@ -1,6 +1,8 @@
+# initialization of tic-tac-toe board and dictionary of players
 board = [" " for _ in range(9)]
 saved_players = {}
 
+# player object for tracking names and points
 class Player:
     def __init__(self, name):
         self.name = name
@@ -21,27 +23,7 @@ class Player:
         print(f" {self.x_score} point(s) playing as X")
         print(f" {self.o_score} point(s) playing as O")
 
-def start_1v1():
-    print("Player X, Enter your username:")
-    name = input()
-    if name in saved_players:
-        playerX = saved_players[name]
-        print(f"Welcome, {playerX.name}")
-    else:
-        playerX = Player(name)
-        saved_players[name] = playerX
-    
-    print("Player O, Enter your username:")
-    name = input()
-    if name in saved_players:
-        playerO = saved_players[name]
-        print(f"Welcome, {playerO.name}")
-    else:
-        playerO = Player(name)
-        saved_players[name] = playerO
-
-    return playerX, playerO
-
+# prints the current game board using for loop
 def print_board():
     print("Current Positions:")
     for i in range(0, 9, 3):
@@ -50,6 +32,7 @@ def print_board():
             print("-" * 9)
     print("")
 
+# prompts a move from the user
 def player_move(x_turn, playerX, playerO):
     try:
         if x_turn == True:
@@ -74,6 +57,7 @@ def player_move(x_turn, playerX, playerO):
         print("You must enter an integer 0-8")
         return player_move(x_turn, playerX, playerO)
 
+# checks to see if a player has won or if the board has been filled
 def check_win(num_moves, playerX, playerO):
     players = {'X': playerX, 'O': playerO}
 
@@ -107,6 +91,29 @@ def check_win(num_moves, playerX, playerO):
     
     return False
 
+# prompts player setup for user vs user
+def start_1v1():
+    print("Player X, Enter your username:")
+    name = input()
+    if name in saved_players:
+        playerX = saved_players[name]
+        print(f"Welcome, {playerX.name}")
+    else:
+        playerX = Player(name)
+        saved_players[name] = playerX
+    
+    print("Player O, Enter your username:")
+    name = input()
+    if name in saved_players:
+        playerO = saved_players[name]
+        print(f"Welcome, {playerO.name}")
+    else:
+        playerO = Player(name)
+        saved_players[name] = playerO
+
+    return playerX, playerO
+
+# runs a user vs user game
 def game_1v1(playerX, playerO):
     game_over = False
     x_turn = True
@@ -121,7 +128,7 @@ def game_1v1(playerX, playerO):
                 board[:] = [' '] * 9
                 input("Enter any character to continue: ")
 
-
+# main function for tic-tac-toe
 def main():
     while True:
         print("\nTime for Tic Tac Toe!\n")
