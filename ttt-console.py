@@ -10,12 +10,16 @@ class Player:
         self.name = name
         self.x_score = 0
         self.o_score = 0
+        self.draw_count = 0
 
     def add_xpoint(self):
         self.x_score += 1
 
     def add_opoint(self):
         self.o_score += 1
+
+    def add_draw(self):
+        self.draw_count += 1
 
     def get_tscore(self):
         return self.x_score + self.o_score
@@ -24,6 +28,7 @@ class Player:
         print(f"{self.name}: {self.x_score + self.o_score} point(s)")
         print(f" {self.x_score} point(s) playing as X")
         print(f" {self.o_score} point(s) playing as O")
+        print(f" {self.draw_count} draw(s)!")
 
 # prints the current game board using for loop
 def print_board():
@@ -89,6 +94,8 @@ def check_win(num_moves, playerX, playerO):
     if num_moves > 8:
         print_board()
         print("It's a draw! Well played.")
+        Player.add_draw(playerX)
+        Player.add_draw(playerO)
         return True
     
     return False
@@ -217,15 +224,29 @@ def game_cpu():
         if num_moves > 4:
             game_over = check_win(num_moves, playerX, playerO)
             if game_over == True:
+                # reset board
                 board[:] = [' '] * 9
                 input("Enter any character to continue: ")
                 break
         print_board()
 
+# sorts saved players dictionary into a list to print
+def print_scoreboard():
+    if len(saved_players) > 1:
+                    sorted_players = list(saved_players.values())
+                    for i in range(len(sorted_players) - 1):
+                        for j in range(len(sorted_players) - i - 1):
+                            if Player.get_tscore(sorted_players[j]) < Player.get_tscore(sorted_players[j + 1]):
+                                sorted_players[j], sorted_players[j + 1] = sorted_players[j + 1], sorted_players[j]
+                    # prints sorted list
+                    for player in sorted_players:
+                        Player.display_score(player)
+
 # main function for tic-tac-toe
 def main():
     while True:
-        print("\nTime for Tic Tac Toe!\n")
+        print("\n---------------------------")
+        print("Time for Tic Tac Toe!\n")
         print("Select an option below 1-3:")
         print("1: Play against a friend")
         print("2: Play against a CPU")
@@ -243,18 +264,7 @@ def main():
             case "2":
                 game_cpu()
             case "3":
-                # sorts saved players dictionary into a list
-                if len(saved_players) > 1:
-                    sorted_players = list(saved_players.values())
-                    for i in range(len(sorted_players) - 1):
-                        for j in range(len(sorted_players) - i - 1):
-                            if Player.get_tscore(sorted_players[j]) < Player.get_tscore(sorted_players[j + 1]):
-                                sorted_players[j], sorted_players[j + 1] = sorted_players[j + 1], sorted_players[j]
-                    # prints sorted list
-                    for player in sorted_players:
-                        Player.display_score(player)
-
-
+                print_scoreboard()
                 input("Enter any character to continue: ")
             case "q":
                 print("Thanks for playing Tic Tac Toe!")
