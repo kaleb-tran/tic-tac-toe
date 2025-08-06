@@ -6,16 +6,146 @@
   <title>Tic-Tac-Toe</title>
   <link rel="stylesheet" href="https://pyscript.net/releases/2025.7.3/core.css" />
   <script type="module" src="https://pyscript.net/releases/2025.7.3/core.js"></script>
+  <style>
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 32px;
+      text-align: center;
+      line-height: 100px;
+      border: 1px solid #000;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h1>Tic-Tac-Toe</h1>
-  
-
+    <h2 id="status">Select an Option Below:</h2>
+    <div id="setup-box">
+      <select id="mode-select">
+        <option value="">---Select Mode---</option>
+        <option value="pvp">Play against a friend</option>
+        <option value="pvc">Play against a CPU</option>
+        <option value="scoreboard">See scoreboard</option>
+      </select>
+      <button id="start-button">Start Game</button>
+    </div>
+    <div id="board">
+      <button class="cell" id="cell-0"></button>
+      <button class="cell" id="cell-1"></button>
+      <button class="cell" id="cell-2"></button>
+      <button class="cell" id="cell-3"></button>
+      <button class="cell" id="cell-4"></button>
+      <button class="cell" id="cell-5"></button>
+      <button class="cell" id="cell-6"></button>
+      <button class="cell" id="cell-7"></button>
+      <button class="cell" id="cell-8"></button>
+    </div>
   <script type="py">
-    from pyscript import display
+    from pyscript import display, when
+    from js import document
 
+    board = [""] * 9
+    current_player = "X"
+    game_over = False
+    game_started = False
 
-    display("PyScript???")
-  </script>
+    class Player:
+      def __init__(self, name):
+        self.name = name
+        self.x_score = 0
+        self.o_score = 0
+        self.draw_count = 0
+
+      def add_xpoint(self):
+        self.x_score += 1
+
+      def add_opoint(self):
+        self.o_score += 1
+
+      def add_draw(self):
+        self.draw_count += 1
+
+      def get_tscore(self):
+        return self.x_score + self.o_score
+    
+    @when("click", "#board button")
+    def handle_click(event):
+      global board, current_player, game_over, game_started
+
+      status = document.getElementById("status")
+
+      if not game_started:
+        status.innerText = "Select a Mode and Press 'Start Game' to Begin"
+        return
+
+      if game_over:
+        return
+
+      cell_id = int(event.target.id.split("-")[1])
+      if board[cell_id] != "":
+        return
+
+      board[cell_id] = current_player
+      event.target.innerText = current_player
+
+      winner = check_win()
+      if winner:
+        game_over = True
+        if winner == "Draw":
+          status.innerText = "It's a draw!"
+        else:
+          status.innerText = f"{winner} wins!"
+      else:
+        current_player = "O" if current_player == "X" else "X"
+        status.innerText = f"{current_player}'s turn"
+
+    def check_win():
+      win_conditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ]
+
+      for a, b, c in win_conditions:
+        if board[a] == board[b] == board[c] and board[a] in ('X', 'O'):
+          return board[a]
+
+      if "" not in board:
+        return "Draw"
+
+      return None
+    
+    @when("click", "#start-button")
+    def start_game(event):
+      global game_started
+      mode = document.getElementById("mode-select").value
+      
+      if mode == "pvp":
+        game_started = True
+        document.getElementById("setup-box").style.display = "none"
+        # game_pvp()
+      elif mode == "pvc":
+        game_started = True
+        document.getElementById("setup-box").style.display = "none"
+        # game_pvc()
+      elif mode == "scoreboard":
+        show_scoreboard()
+      else:
+        document.getElementById("status").innerText = "Please Select a Valid Mode:"
+        return
+
+</script>
 </body>
 </html>
