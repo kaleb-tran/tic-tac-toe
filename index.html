@@ -41,6 +41,7 @@
       <input type="text" id="playerO" placeholder="Enter Player O Name" style="display:none;">
       <button id="submit-player-button" style="display:none;">Submit</button>
     </div>
+    <button id="play-again-button" style="display:none;">Play Again</button>
     <div id="board">
       <button class="cell" id="cell-0"></button>
       <button class="cell" id="cell-1"></button>
@@ -59,8 +60,11 @@
     board = [""] * 9
     saved_players = {}
     current_player = "X"
+    playerX = None
+    playerO = None
     game_over = False
     game_started = False
+    is_pvp = True
 
     class Player:
       def __init__(self, name):
@@ -81,9 +85,20 @@
       def get_tscore(self):
         return self.x_score + self.o_score
     
+    def clear_board():
+      cells = document.getElementsByClassName("cell")
+      for i in range(cells.length):
+        cells[i].innerText = ""
+
+    @when("click", "#play-again-button")
+    def play_again():
+      clear_board()
+      document.getElementById("play-again-button").style.display = "none"
+      document.getElementById("mode-box").style.display = "block"
+
     @when("click", "#board button")
     def handle_click(event):
-      global board, current_player, game_over, game_started
+      global board, current_player, game_over, game_started, is_pvp
 
       status = document.getElementById("status")
 
@@ -103,6 +118,7 @@
       winner = check_win()
       if winner:
         game_over = True
+        document.getElementById("play-again-button").style.display = "block"
         if winner == "Draw":
           status.innerText = "It's a draw!"
         else:
@@ -110,6 +126,9 @@
       else:
         current_player = "O" if current_player == "X" else "X"
         status.innerText = f"{current_player}'s turn"
+
+        if not is_pvp:
+          cpu_move()
 
     def check_win():
       win_conditions = [
@@ -152,7 +171,7 @@
 
     @when("click", "#start-button")
     def start_game(event):
-      global game_started
+      global game_started, is_pvp
       mode = document.getElementById("mode-select").value
       
       if mode == "pvp":
@@ -160,7 +179,7 @@
       elif mode == "pvc":
         game_started = True
         document.getElementById("mode-box").style.display = "none"
-        # game_pvc()
+        # prompt_pvc()
       elif mode == "scoreboard":
         show_scoreboard()
       else:
