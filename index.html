@@ -129,12 +129,18 @@
         document.getElementById("play-again-button").style.display = "block"
         if winner == "Draw":
           status.innerText = "It's a draw!"
+        elif winner == "X":
+          status.innerText = f"{playerX.name} wins!"
         else:
-          status.innerText = f"{winner} wins!"
+          status.innerText = f"{playerO.name} wins!"
       else:
-        current_player = "O" if current_player == "X" else "X"
-        status.innerText = f"{current_player}'s turn"
-
+        if current_player == "X":
+          status.innerText = f"{playerO.name}'s turn"
+          current_player = "O"
+        else:
+          status.innerText = f"{playerX.name}'s turn"
+          current_player = "X"
+        
         if not is_pvp:
           cpu_move()
 
@@ -170,13 +176,34 @@
     
     @when("click", "#submit-player-button")
     def save_players(event):
-      global game_started
+      global game_started, playerX, playerO, is_pvp
       mode = document.getElementById("mode-select").value
+
+      nameX = document.getElementById("playerX").value
+      nameO = document.getElementById("playerO").value
       
-      # TO-DO player saving
+      if not 2 <= len(nameX) <= 32:
+        document.getElementById("status").innerText = "Username X must be between 2 and 12 characters."
+        return
+      if not 2 <= len(nameO) <= 32:
+        document.getElementById("status").innerText = "Username O must be between 2 and 12 characters."
+        return
+
+      if is_pvp:
+        if nameX in saved_players:
+          playerX = saved_players[nameX]
+        else:
+          playerX = Player(nameX)
+          saved_players[nameX] = playerX
+    
+        if nameO in saved_players:
+          playerO = saved_players[nameO]
+        else:
+          playerO = Player(nameO)
+          saved_players[nameO] = playerO
 
       document.getElementById("player-box").style.display = "none"
-      document.getElementById("status").innerText = "X's turn"
+      document.getElementById("status").innerText = f"{playerX.name}'s turn"
       game_started = True
 
     @when("click", "#start-button")
