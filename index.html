@@ -86,6 +86,13 @@
         return self.x_score + self.o_score
     
     def clear_board():
+      global board, current_player, game_over, game_started
+
+      board = [""] * 9
+      current_player = "X"
+      game_over = False
+      game_started = False
+
       cells = document.getElementsByClassName("cell")
       for i in range(cells.length):
         cells[i].innerText = ""
@@ -94,6 +101,7 @@
     def play_again():
       clear_board()
       document.getElementById("play-again-button").style.display = "none"
+      document.getElementById("status").innerText = "Select an Option Below:"
       document.getElementById("mode-box").style.display = "block"
 
     @when("click", "#board button")
@@ -154,6 +162,7 @@
     def prompt_pvp():
       document.getElementById("status").innerText = "Enter Your Usernames:"
       document.getElementById("mode-box").style.display = "none"
+      document.getElementById("player-box").style.display = "block"
       document.getElementById("playerX").style.display = "inline"
       document.getElementById("playerO").style.display = "inline"
       document.getElementById("submit-player-button").style.display = "block"
@@ -167,6 +176,7 @@
       # TO-DO player saving
 
       document.getElementById("player-box").style.display = "none"
+      document.getElementById("status").innerText = "X's turn"
       game_started = True
 
     @when("click", "#start-button")
@@ -175,11 +185,13 @@
       mode = document.getElementById("mode-select").value
       
       if mode == "pvp":
+        is_pvp = True
         prompt_pvp()
       elif mode == "pvc":
+        is_pvp = False
         game_started = True
         document.getElementById("mode-box").style.display = "none"
-        # prompt_pvc()
+        prompt_pvc()
       elif mode == "scoreboard":
         show_scoreboard()
       else:
