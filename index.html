@@ -41,6 +41,10 @@
       <input type="text" id="playerO" placeholder="Enter Player O Name" style="display:none;">
       <button id="submit-player-button" style="display:none;">Submit</button>
     </div>
+    <div id="xo-select-box" style="display:none;">
+      <button id="x-button">X</button>
+      <button id="o-button">O</button>
+    </div>
     <button id="play-again-button" style="display:none;">Play Again</button>
     <div id="scoreboard-box" style="display:none;">
       <h3 id="score-list"></h3>
@@ -69,6 +73,7 @@
     game_over = False
     game_started = False
     is_pvp = True
+    cpu_is_x = False
 
     class Player:
       def __init__(self, name):
@@ -226,15 +231,25 @@
       document.getElementById("playerX").style.display = "inline"
       document.getElementById("playerO").style.display = "inline"
       document.getElementById("submit-player-button").style.display = "block"
-      return
     
+    def cpu_move():
+      return
+
     @when("click", "#submit-player-button")
     def save_players(event):
-      global game_started, playerX, playerO, is_pvp
+      global game_started, playerX, playerO, is_pvp, cpu_is_x
       mode = document.getElementById("mode-select").value
 
-      nameX = document.getElementById("playerX").value
-      nameO = document.getElementById("playerO").value
+      if is_pvp:
+        nameX = document.getElementById("playerX").value
+        nameO = document.getElementById("playerO").value
+      else:
+        if cpu_is_x:
+          nameX = "CPU"
+          nameO = document.getElementById("playerO").value
+        else:
+          nameX = document.getElementById("playerX").value
+          nameO = "CPU"
       
       if not 2 <= len(nameX) <= 32:
         document.getElementById("status").innerText = "Username X must be between 2 and 12 characters."
@@ -243,22 +258,46 @@
         document.getElementById("status").innerText = "Username O must be between 2 and 12 characters."
         return
 
-      if is_pvp:
-        if nameX in saved_players:
-          playerX = saved_players[nameX]
-        else:
-          playerX = Player(nameX)
-          saved_players[nameX] = playerX
+      if nameX in saved_players:
+        playerX = saved_players[nameX]
+      else:
+        playerX = Player(nameX)
+        saved_players[nameX] = playerX
     
-        if nameO in saved_players:
-          playerO = saved_players[nameO]
-        else:
-          playerO = Player(nameO)
-          saved_players[nameO] = playerO
+      if nameO in saved_players:
+        playerO = saved_players[nameO]
+      else:
+        playerO = Player(nameO)
+        saved_players[nameO] = playerO
 
       document.getElementById("player-box").style.display = "none"
       document.getElementById("status").innerText = f"{playerX.name}'s turn"
       game_started = True
+
+    def prompt_pvc():
+      document.getElementById("status").innerText = "Select to play as 'X' or 'O'"
+      document.getElementById("mode-box").style.display = "none"
+      document.getElementById("xo-select-box").style.display = "block"
+
+    @when("click", "#x-button")
+    def pvc_x(event):
+      global cpu_is_x
+      cpu_is_x = False
+      document.getElementById("status").innerText = "Enter Your Username:"
+      document.getElementById("xo-select-box").style.display = "none"
+      document.getElementById("player-box").style.display = "block"
+      document.getElementById("playerX").style.display = "inline"
+      document.getElementById("submit-player-button").style.display = "block"
+
+    @when("click", "#o-button")
+    def pvc_o(event):
+      global cpu_is_x
+      cpu_is_x = True
+      document.getElementById("status").innerText = "Enter Your Username:"
+      document.getElementById("xo-select-box").style.display = "none"
+      document.getElementById("player-box").style.display = "block"
+      document.getElementById("playerO").style.display = "inline"
+      document.getElementById("submit-player-button").style.display = "block"
 
     @when("click", "#start-button")
     def start_game(event):
