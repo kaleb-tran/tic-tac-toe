@@ -27,7 +27,7 @@
 <body>
   <h1>Tic-Tac-Toe</h1>
     <h2 id="status">Select an Option Below:</h2>
-    <div id="setup-box">
+    <div id="mode-box">
       <select id="mode-select">
         <option value="">---Select Mode---</option>
         <option value="pvp">Play against a friend</option>
@@ -35,6 +35,11 @@
         <option value="scoreboard">See scoreboard</option>
       </select>
       <button id="start-button">Start Game</button>
+    </div>
+    <div id="player-box">
+      <input type="text" id="playerX" placeholder="Enter Player X Name" style="display:none;">
+      <input type="text" id="playerO" placeholder="Enter Player O Name" style="display:none;">
+      <button id="submit-player-button" style="display:none;">Submit</button>
     </div>
     <div id="board">
       <button class="cell" id="cell-0"></button>
@@ -52,6 +57,7 @@
     from js import document
 
     board = [""] * 9
+    saved_players = {}
     current_player = "X"
     game_over = False
     game_started = False
@@ -82,7 +88,6 @@
       status = document.getElementById("status")
 
       if not game_started:
-        status.innerText = "Select a Mode and Press 'Start Game' to Begin"
         return
 
       if game_over:
@@ -127,18 +132,34 @@
 
       return None
     
+    def prompt_pvp():
+      document.getElementById("status").innerText = "Enter Your Usernames:"
+      document.getElementById("mode-box").style.display = "none"
+      document.getElementById("playerX").style.display = "inline"
+      document.getElementById("playerO").style.display = "inline"
+      document.getElementById("submit-player-button").style.display = "block"
+      return
+    
+    @when("click", "#submit-player-button")
+    def save_players(event):
+      global game_started
+      mode = document.getElementById("mode-select").value
+      
+      # TO-DO player saving
+
+      document.getElementById("player-box").style.display = "none"
+      game_started = True
+
     @when("click", "#start-button")
     def start_game(event):
       global game_started
       mode = document.getElementById("mode-select").value
       
       if mode == "pvp":
-        game_started = True
-        document.getElementById("setup-box").style.display = "none"
-        # game_pvp()
+        prompt_pvp()
       elif mode == "pvc":
         game_started = True
-        document.getElementById("setup-box").style.display = "none"
+        document.getElementById("mode-box").style.display = "none"
         # game_pvc()
       elif mode == "scoreboard":
         show_scoreboard()
