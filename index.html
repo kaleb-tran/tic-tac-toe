@@ -64,6 +64,7 @@
   <script type="py">
     from pyscript import display, when
     from js import document
+    import random
 
     board = [""] * 9
     saved_players = {}
@@ -151,7 +152,6 @@
       else:
         document.getElementById("score-list").innerText = "No players to display"
       
-
     @when("click", "#play-again-button")
     def play_again():
       clear_board()
@@ -159,9 +159,21 @@
       document.getElementById("status").innerText = "Select an Option Below:"
       document.getElementById("mode-box").style.display = "block"
 
+    def cpu_move():
+      global board, current_player, playerX, playerO
+      status = document.getElementById("status")
+
+      empty_indices = [i for i, cell in enumerate(board) if cell == ""]
+      if not empty_indices:
+        return
+      
+      choice = random.choice(empty_indices)
+      cell_button = document.getElementById(f"cell-{choice}")
+      cell_button.click()
+
     @when("click", "#board button")
     def handle_click(event):
-      global board, current_player, game_over, game_started, is_pvp
+      global board, current_player, game_over, game_started, is_pvp, cpu_is_x
 
       status = document.getElementById("status")
 
@@ -181,6 +193,7 @@
       winner = check_win()
       if winner:
         game_over = True
+        cpu_is_x = False
         document.getElementById("play-again-button").style.display = "block"
         if winner == "Draw":
           status.innerText = "It's a draw!"
@@ -196,12 +209,21 @@
         if current_player == "X":
           status.innerText = f"{playerO.name}'s turn"
           current_player = "O"
+          if not is_pvp and not cpu_is_x:
+            cpu_move()
+            if game_over:
+              return
+            status.innerText = f"{playerX.name}'s turn"
+            current_player = "X"
         else:
           status.innerText = f"{playerX.name}'s turn"
           current_player = "X"
-        
-        if not is_pvp:
-          cpu_move()
+          if not is_pvp and cpu_is_x:
+            cpu_move()
+            if game_over:
+              return
+            status.innerText = f"{playerO.name}'s turn"
+            current_player = "O"
 
     def check_win():
       win_conditions = [
@@ -232,12 +254,9 @@
       document.getElementById("playerO").style.display = "inline"
       document.getElementById("submit-player-button").style.display = "block"
     
-    def cpu_move():
-      return
-
     @when("click", "#submit-player-button")
     def save_players(event):
-      global game_started, playerX, playerO, is_pvp, cpu_is_x
+      global game_started, current_player, playerX, playerO, is_pvp, cpu_is_x
       mode = document.getElementById("mode-select").value
 
       if is_pvp:
@@ -252,10 +271,10 @@
           nameO = "CPU"
       
       if not 2 <= len(nameX) <= 32:
-        document.getElementById("status").innerText = "Username X must be between 2 and 12 characters."
+        document.getElementById("status").innerText = "Username X must be between 2 and 32 characters."
         return
       if not 2 <= len(nameO) <= 32:
-        document.getElementById("status").innerText = "Username O must be between 2 and 12 characters."
+        document.getElementById("status").innerText = "Username O must be between 2 and 32 characters."
         return
 
       if nameX in saved_players:
@@ -270,9 +289,14 @@
         playerO = Player(nameO)
         saved_players[nameO] = playerO
 
-      document.getElementById("player-box").style.display = "none"
-      document.getElementById("status").innerText = f"{playerX.name}'s turn"
       game_started = True
+      document.getElementById("player-box").style.display = "none"
+      if cpu_is_x:
+        cpu_move()
+        current_player = "O"
+        document.getElementById("status").innerText = f"{playerO.name}'s turn"
+      else:
+        document.getElementById("status").innerText = f"{playerX.name}'s turn"
 
     def prompt_pvc():
       document.getElementById("status").innerText = "Select to play as 'X' or 'O'"
@@ -287,6 +311,7 @@
       document.getElementById("xo-select-box").style.display = "none"
       document.getElementById("player-box").style.display = "block"
       document.getElementById("playerX").style.display = "inline"
+      document.getElementById("playerO").style.display = "none"
       document.getElementById("submit-player-button").style.display = "block"
 
     @when("click", "#o-button")
@@ -296,6 +321,7 @@
       document.getElementById("status").innerText = "Enter Your Username:"
       document.getElementById("xo-select-box").style.display = "none"
       document.getElementById("player-box").style.display = "block"
+      document.getElementById("playerX").style.display = "none"
       document.getElementById("playerO").style.display = "inline"
       document.getElementById("submit-player-button").style.display = "block"
 
