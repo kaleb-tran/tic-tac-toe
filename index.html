@@ -42,6 +42,10 @@
       <button id="submit-player-button" style="display:none;">Submit</button>
     </div>
     <button id="play-again-button" style="display:none;">Play Again</button>
+    <div id="scoreboard-box" style="display:none;">
+      <h3 id="score-list"></h3>
+      <button id="back-button">Back</button>
+    </div>
     <div id="board">
       <button class="cell" id="cell-0"></button>
       <button class="cell" id="cell-1"></button>
@@ -96,6 +100,52 @@
       cells = document.getElementsByClassName("cell")
       for i in range(cells.length):
         cells[i].innerText = ""
+    
+    @when("click", "#back-button")
+    def back_mode_select():
+      document.getElementById("scoreboard-box").style.display = "none"
+      document.getElementById("status").innerText = "Select an Option Below:"
+      document.getElementById("mode-box").style.display = "block"
+      document.getElementById("board").style.display = "grid"
+
+    def get_ordinal(n):
+      if 10 <= n % 100 <= 20:
+        suffix = "th"
+      else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+      return f"{n}{suffix}"
+    
+    def show_scoreboard():
+      document.getElementById("status").innerText = "Scoreboard:"
+      document.getElementById("mode-box").style.display = "none"
+      document.getElementById("board").style.display = "none"
+      document.getElementById("scoreboard-box").style.display = "block"
+
+      if len(saved_players) > 1:
+        sorted_players = list(saved_players.values())
+        for i in range(len(sorted_players) - 1):
+          for j in range(len(sorted_players) - i - 1):
+            if Player.get_tscore(sorted_players[j]) < Player.get_tscore(sorted_players[j + 1]):
+              sorted_players[j], sorted_players[j + 1] = sorted_players[j + 1], sorted_players[j]
+        # call and clear score list element
+        score_list = document.getElementById("score-list")
+        while score_list.firstChild:
+          score_list.removeChild(score_list.firstChild)
+        # appends and displays player scores
+        place = 1
+        for player in sorted_players:
+          player_score = document.createElement("pre")
+          player_score.innerText = (
+            f"{get_ordinal(place)} - {player.name}: {player.x_score + player.o_score} point(s)\n"
+            f"    {player.x_score} point(s) playing as X\n"
+            f"    {player.o_score} point(s) playing as O\n"
+            f"    {player.draw_count} draw(s)!\n"
+          )
+          score_list.appendChild(player_score)
+          place += 1
+      else:
+        document.getElementById("score-list").innerText = "No players to display"
+      
 
     @when("click", "#play-again-button")
     def play_again():
@@ -129,10 +179,14 @@
         document.getElementById("play-again-button").style.display = "block"
         if winner == "Draw":
           status.innerText = "It's a draw!"
+          Player.add_draw(playerX)
+          Player.add_draw(playerO)
         elif winner == "X":
           status.innerText = f"{playerX.name} wins!"
+          Player.add_xpoint(playerX)
         else:
           status.innerText = f"{playerO.name} wins!"
+          Player.add_opoint(playerO)
       else:
         if current_player == "X":
           status.innerText = f"{playerO.name}'s turn"
@@ -216,8 +270,6 @@
         prompt_pvp()
       elif mode == "pvc":
         is_pvp = False
-        game_started = True
-        document.getElementById("mode-box").style.display = "none"
         prompt_pvc()
       elif mode == "scoreboard":
         show_scoreboard()
